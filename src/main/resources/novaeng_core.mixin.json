@@ -680,7 +680,6 @@
     "enumcache.mekanism.MixinTransmitterType",
     "enumcache.mekanism.MixinTransporterTier",
     "enumcache.mekanism.MixinTubeTier",
-    "enumcache.mekanism.MixinUpgrade",
     "enumcache.mekanism.MixinWrenches",
     "enumcache.mets.MixinFabricatorType",
     "enumcache.mets.MixinMetsBlockWithTileEntity",
