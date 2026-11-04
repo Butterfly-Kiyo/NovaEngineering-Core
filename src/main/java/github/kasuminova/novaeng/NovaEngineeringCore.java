@@ -61,8 +61,8 @@ import org.apache.logging.log4j.Logger;
         "required-after-client:lumenized@[1.0.2,);" +
         "after:astralsorcery"
     ,
-    acceptedMinecraftVersions = "[1.12, 1.13)",
-    acceptableRemoteVersions = "[1.21.7, 1.24.0)"
+    // Use Forge's default same-version check so fork/dev builds accept themselves.
+    acceptedMinecraftVersions = "[1.12, 1.13)"
 )
 @SuppressWarnings("MethodMayBeStatic")
 public class NovaEngineeringCore {

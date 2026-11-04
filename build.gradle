@@ -38,7 +38,8 @@ private String defaultModVersion() {
     return "${previousTag}+${shortHash}"
 }
 
-if (!gradle.startParameter.projectProperties.containsKey('mod_version')) {
+if (!gradle.startParameter.projectProperties.containsKey('mod_version')
+    && (!project.hasProperty('mod_version') || project.property('mod_version').toString().trim() in ['', '0.0.0'])) {
     project.setProperty('mod_version', defaultModVersion())
 }
 

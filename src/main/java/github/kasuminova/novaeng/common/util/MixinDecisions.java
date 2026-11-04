@@ -82,6 +82,9 @@ public final class MixinDecisions {
             case "minecraft.MixinRegionRenderCacheBuilderCapacity" -> {
                 return actiniumLoaded;
             }
+            case "minecraft.MixinSPacketCustomPayloadLimit" -> {
+                return !isPresent("dragoncore");
+            }
             case "lumenized.MixinBloomRenderLayerCapacity" -> {
                 return actiniumLoaded && isPresent("lumenized");
             }
@@ -146,7 +149,10 @@ public final class MixinDecisions {
                 && NovaEngCoreConfig.CLIENT.optimizeAtlasUploadBinding;
             case "journeymap.MixinThemeTexturePreload", "journeymap.MixinWidgetTexturePreload" ->
                 isPresent("journeymap");
-            case "techguns.MixinTemplateInputBuffer" -> isPresent("techguns");
+            // Techguns CE exposes one loadTemplates ObjectInputStream site, not the two required here.
+            case "techguns.MixinTemplateInputBuffer" -> false;
+            // Techguns CE 2.2.0.1 removed shouldRenderItem; the legacy overwrite cannot apply.
+            case "techguns.MixinItemRenderHack" -> false;
             case "immersiveengineering.MixinManualRecipeDisplay" -> immersiveEngineeringLoaded;
             case "minecraft.forge.MixinForgelinConstructionAdapter" -> isPresent("forgelin_continuous");
             case "jeresources.MixinEnchantmentWrapper", "jeresources.InvokerEnchantmentWrapper" ->
