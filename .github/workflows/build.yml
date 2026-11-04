@@ -35,3 +35,79 @@ jobs:
           path: build/libs/*.jar
           if-no-files-found: error
           retention-days: 14
+
+  dev-release:
+    name: Update dev prerelease
+    needs: build
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: dev-release
+      cancel-in-progress: false
+    steps:
+      - name: Download successful build
+        uses: actions/download-artifact@v4
+        with:
+          name: NovaEngineering-Core-${{ github.sha }}
+          path: release-assets
+
+      - name: Publish to dev release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BUILD_SHA: ${{ github.sha }}
+          BUILD_BRANCH: ${{ github.ref_name }}
+          BUILD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          jars=(release-assets/*.jar)
+          runtime_jars=()
+          for jar in "${jars[@]}"; do
+            case "$(basename "$jar")" in
+              *-dev.jar|*-sources.jar|*-javadoc.jar|*-shadow.jar) ;;
+              *) runtime_jars+=("$jar") ;;
+            esac
+          done
+          if (( ${#runtime_jars[@]} == 0 )); then
+            echo 'No runtime JARs found; refusing to update dev release.' >&2
+            exit 1
+          fi
+
+          if gh api "repos/$GH_REPO/git/ref/tags/dev" --silent; then
+            gh api --method PATCH "repos/$GH_REPO/git/refs/tags/dev" \
+              -f sha="$BUILD_SHA" -F force=true
+          else
+            gh api --method POST "repos/$GH_REPO/git/refs" \
+              -f ref=refs/tags/dev -f sha="$BUILD_SHA"
+          fi
+
+          printf 'Latest successful development build.\n\nBranch: `%s`\nCommit: `%s`\nBuild: %s\n' \
+            "$BUILD_BRANCH" "$BUILD_SHA" "$BUILD_URL" > dev-notes.md
+          if gh release view dev >/dev/null 2>&1; then
+            gh release edit dev --title 'Dev build' --notes-file dev-notes.md \
+              --prerelease --draft=false
+          else
+            gh release create dev --verify-tag --title 'Dev build' \
+              --notes-file dev-notes.md --prerelease --latest=false
+          fi
+          gh release upload dev "${runtime_jars[@]}" --clobber
+
+          # Remove obsolete JARs only after the current runtime JARs upload successfully.
+          gh release view dev --json assets \
+            --jq '.assets[].name | select(endswith(".jar"))' > old-assets.txt
+          while IFS= read -r asset; do
+            keep=false
+            for jar in "${runtime_jars[@]}"; do
+              if [[ "$(basename "$jar")" == "$asset" ]]; then
+                keep=true
+                break
+              fi
+            done
+            if [[ "$keep" == false ]]; then
+              gh release delete-asset dev "$asset" --yes
+            fi
+          done < old-assets.txt
