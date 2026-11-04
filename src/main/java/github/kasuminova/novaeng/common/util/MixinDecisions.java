@@ -49,6 +49,10 @@ public final class MixinDecisions {
     }
 
     public static boolean shouldApply(final String mixinName) {
+        // Hybrid Chunk lifecycle code reads entityLists directly and requires eager sections.
+        if ("minecraft.MixinChunkLazyEntityLists".equals(mixinName) && isCatServerPresent()) {
+            return false;
+        }
         switch (mixinName) {
             case "minecraft.forge.MixinOreRecipeRevision" -> {
                 return true;
@@ -444,6 +448,12 @@ public final class MixinDecisions {
             case "universaltweaks.MixinUTEntityDesync" -> NovaEngCoreConfig.SERVER.optimizeUniversalTweaksEntityBlacklist;
             default -> true;
         };
+    }
+
+    private static boolean isCatServerPresent() {
+        final ClassLoader loader = MixinDecisions.class.getClassLoader();
+        return loader.getResource("catroom/CatRoom.class") != null
+            || loader.getResource("catserver/server/CatServer.class") != null;
     }
 
     private static boolean isPresent(final String modId) {
