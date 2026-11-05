@@ -1,13 +1,14 @@
 package github.kasuminova.novaeng.mixin.threng;
 
 import github.kasuminova.novaeng.common.util.OnlyWriteEnergyContainer;
-import io.github.phantamanta44.threng.tile.base.TilePowered;
 import net.minecraftforge.energy.IEnergyStorage;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-@Mixin(value = TilePowered.class, remap = false)
+@Pseudo
+@Mixin(targets = "io.github.phantamanta44.threng.tile.base.TilePowered", remap = false)
 public abstract class MixinTilePowered {
 
     // LibNine reports canExtract() == true even when the reservoir's output rate is zero.

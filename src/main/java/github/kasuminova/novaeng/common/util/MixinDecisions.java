@@ -198,7 +198,8 @@ public final class MixinDecisions {
             case "bibliocraft.MixinModelManagerPaintingGeneration" -> bibliocraftLoaded;
             case "ar.MixinTileForgePowerInput", "ar.MixinTileForgePowerOutput" -> arLoaded;
             case "enderio.MixinNNList" -> enderioLoaded;
-            case "threng.MixinL9AspectInventory", "threng.MixinL9AspectSlot" -> threngLoaded;
+            case "threng.MixinL9AspectInventory", "threng.MixinL9AspectSlot",
+                 "threng.MixinTilePowered" -> threngLoaded;
             case "immersiveengineering.MixinTileEntityPumpjack" -> immersiveEngineeringLoaded;
             case "cofh.MixinTypeEntry" -> cofhLoaded;
             case "cofh.MixinTransposerRecipeCategoryFill",
